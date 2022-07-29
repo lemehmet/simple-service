@@ -1,0 +1,64 @@
+openapi: 3.0.2
+info:
+  title: A simple service to demonstrate things
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+paths:
+  /:
+    get:
+      description: Service description link (RFC8631)
+      operationId: getServiceDescription
+      responses:
+        "204":
+          description: No Content
+  /spec:
+    get:
+      description: Get this spec itself
+      operationId: getSpec
+      responses:
+        "200":
+          description: Return this OpenAPI spec for registration
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: This OpenAPI spec
+  /health:
+    get:
+      description: A simple healthcheck
+      operationId: getHealth
+      responses:
+        "200":
+          description: A health check
+  /calculate:
+    post:
+      description: Do something
+      summary: Does something
+      operationId: postCalculate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tuple'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+components:
+  schemas:
+    tuple:
+      type: object
+      properties:
+        a:
+          type: integer
+        b:
+          type: integer
+    result:
+      type: object
+      properties:
+        result:
+          type: integer
