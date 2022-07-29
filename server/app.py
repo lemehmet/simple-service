@@ -1,5 +1,6 @@
+import base64
 import json
-
+from pathlib import Path
 from server.common.util import get_spec_path
 
 
@@ -14,14 +15,17 @@ def handler(event, context):
             result = method(json.loads(event['body']))
         else:
             result = method()
-    return response_proxy(result[0], result[1], result[2] if len(result) >= 3 else None)
+    return response_proxy(content=result[0],
+                          status_code=result[1],
+                          headers=result[2] if len(result) >= 3 else None,
+                          isBase64Encoded=result[3] if len(result) >= 4 else False)
 
 
-def response_proxy(content, status_code, headers=None):
+def response_proxy(content, status_code, headers=None, isBase64Encoded=False):
     response = {
-        'isBase64Encoded': False,
+        'isBase64Encoded': isBase64Encoded,
         'statusCode': status_code,
-        'body': json.dumps(content),
+        'body': json.dumps(content) if not isBase64Encoded else base64.encodebytes(content),
         'headers': {}
     }
     if headers:
@@ -30,11 +34,7 @@ def response_proxy(content, status_code, headers=None):
 
 
 def getSpec():
-    spec_path = get_spec_path()
-    content = "Nothing"
-    with open(spec_path, 'r') as f:
-        content = f.read()
-    return content, 200
+    return Path(get_spec_path()).read_bytes(), 200, None, True
 
 
 def getServiceDescription():
